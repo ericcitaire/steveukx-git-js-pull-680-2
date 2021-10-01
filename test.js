@@ -69,17 +69,18 @@ function run(listenTo, cmd, ...args) {
     });
 }
 
-const tries = 20;
 // The more there are parallel processes, the more likely
 // it is to loss data when listening on `exit` event. 
 const processes = 100;
+const s = []
+for (let i = 0; i < processes; i++) {
+    s.push(Math.round(Math.random() * 200000));
+}
+
+const tries = 20;
 for (let i = 0; i < tries; i++) {
     describe('Capturing `stdout`', function () {
         it('returning on `exit` +50ms', async function () {
-            const s = []
-            for (let i = 0; i < processes; i++) {
-                s.push(Math.round(Math.random() * 200000));
-            }
             const res = await Promise.all(s.map(async n => {
                 return await runWithExit('python', 'test.py', n);
             }));
@@ -87,10 +88,6 @@ for (let i = 0; i < tries; i++) {
             assert.deepEqual(res.map(r => r.stdOut.length), s.map(n => 'Hello world\n'.length * n), 'Ooops...');
         });
         it('returning on `exit` +50ms OR on `close`', async function () {
-            const s = []
-            for (let i = 0; i < processes; i++) {
-                s.push(Math.round(Math.random() * 200000));
-            }
             const res = await Promise.all(s.map(async n => {
                 return await runWithBoth('python', 'test.py', n);
             }));
@@ -98,10 +95,6 @@ for (let i = 0; i < tries; i++) {
             assert.deepEqual(res.map(r => r.stdOut.length), s.map(n => 'Hello world\n'.length * n), 'Ooops...');
         });
         it('returning on `close`', async function () {
-            const s = []
-            for (let i = 0; i < processes; i++) {
-                s.push(Math.round(Math.random() * 200000));
-            }
             const res = await Promise.all(s.map(async n => {
                 return await runWithClose('python', 'test.py', n);
             }));
